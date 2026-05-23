@@ -11,6 +11,9 @@ The main file is `index.html`, where you can interact with the simulation using 
 3. Double-click `index.html` or open it in a web browser.
 4. If you prefer, use a simple local server such as VS Code Live Server or `python -m http.server`.
 
+# License
+
+This project is released under the MIT License. See the `LICENSE` file for details.
 
 # Simulador de Tesseract 4D
 
@@ -24,6 +27,10 @@ O arquivo principal é `index.html`, onde é possível interagir com a simulaç�
 2. Abra a pasta do projeto no seu computador.
 3. Clique duas vezes em `index.html` ou abra-o em um navegador web.
 4. Se desejar, use um servidor local simples como o Live Server do VS Code ou `python -m http.server`.
+
+## Licença
+
+Este projeto é distribuído sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
 ---
 
