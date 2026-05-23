@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tesseract 4D</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #00120e;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+    }
+    #canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    #info {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    #links {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 10;
+      text-align: right;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    #links a {
+      display: block;
+      color: #00ffcc;
+      text-decoration: none;
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+    #links a:last-child {
+      margin-bottom: 0;
+    }
+    #bottomControls {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 12;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #bottomControls label,
+    #toggleDots {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(17, 17, 17, 0.95);
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: default;
+    }
+    #bottomControls input[type=range] {
+      width: 120px;
+    }
+    #toggleDots {
+      cursor: pointer;
+      user-select: none;
+      border: none;
+      background: #111;
+    }
+    #toggleDots:hover {
+      background: #181818;
+    }
+    #topControls {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      right: 12px;
+      z-index: 12;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .controlItem {
+      position: relative;
+    }
+    #colorButton,
+    #langButton {
+      min-width: 60px;
+      height: 34px;
+      border-radius: 6px;
+      background: #111;
+      border: 1px solid #333;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      padding: 0 12px;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+    #colorButton:hover,
+    #langButton:hover {
+      background: #181818;
+    }
+    #colorMenu,
+    #langMenu {
+      position: absolute;
+      top: 42px;
+      right: 0;
+      z-index: 12;
+      display: none;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 6px;
+      min-width: 160px;
+    }
+    .langOption {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      font-size: 0.95rem;
+      text-align: left;
+    }
+    .langOption:last-child {
+      margin-bottom: 0;
+    }
+    .langOption:hover,
+    .langOption.active {
+      background: #222;
+    }
+    .colorOption {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      background: transparent;
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      font-size: 0.95rem;
+      text-align: left;
+    }
+    .colorOption:last-child {
+      margin-bottom: 0;
+    }
+    .colorOption:hover {
+      background: #222;
+    }
+    .langOption {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      font-size: 0.95rem;
+      text-align: left;
+    }
+    .langOption:last-child {
+      margin-bottom: 0;
+    }
+    .langOption:hover,
+    .langOption.active {
+      background: #222;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">Tesseract 4D → 3D → 2D</div>
+  <div id="links">
+    <a href="https://github.com/angelodallecrode" target="_blank" rel="noopener noreferrer">https://github.com/angelodallecrode</a>
+    <a href="https://www.linkedin.com/in/angelodallecrode/" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/in/angelodallecrode</a>
+  </div>
+  <div id="bottomControls">
+    <label>
+      Width
+      <input id="widthSlider" type="range" min="1" max="10" value="2" />
+    </label>
+    <button id="toggleDots">Hide dots</button>
+  </div>
+  <div id="topControls">
+    <div class="controlItem">
+      <div id="colorButton">Color</div>
+      <div id="colorMenu">
+        <button class="colorOption" data-color="#00ffcc" style="color:#00ffcc;">Ciano</button>
+        <button class="colorOption" data-color="#ff5eff" style="color:#ff5eff;">Rosa</button>
+        <button class="colorOption" data-color="#7cff00" style="color:#7cff00;">Verde</button>
+        <button class="colorOption" data-color="#ffd800" style="color:#ffd800;">Amarelo</button>
+        <button class="colorOption" data-color="#00aaff" style="color:#00aaff;">Azul</button>
+        <button class="colorOption" data-color="#ffffff" style="color:#ffffff;">Branco</button>
+      </div>
+    </div>
+    <div class="controlItem">
+      <div id="langButton">Language</div>
+      <div id="langMenu">
+        <button class="langOption active" data-lang="pt">PT</button>
+        <button class="langOption" data-lang="en">EN</button>
+        <button class="langOption" data-lang="ru">RU</button>
+        <button class="langOption" data-lang="zh">ZH</button>
+      </div>
+    </div>
+  </div>
+  <canvas id="canvas"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const WIDTH = window.innerWidth;
+    const HEIGHT = window.innerHeight;
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+
+    const size = 120;
+    const points = [];
+    const edges = [];
+
+    const rotation = {
+      xy: 0.2,
+      xz: 0.2,
+      xw: 0.2,
+      yz: 0.2,
+      yw: 0.2,
+      zw: 0.2
+    };
+
+    const camera = {
+      distance4D: 450,
+      distance3D: 400,
+      offsetX: 0,
+      offsetY: 0,
+      zoom: 1
+    };
+
+    let lineColor = '#00ffcc';
+    let lineWidth = 2;
+    let showDots = true;
+    const keys = {};
+
+    for (let x of [-1, 1]) {
+      for (let y of [-1, 1]) {
+        for (let z of [-1, 1]) {
+          for (let w of [-1, 1]) {
+            points.push([x * size, y * size, z * size, w * size]);
+          }
+        }
+      }
+    }
+
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const diff = points[i].reduce((acc, value, index) => acc + (value !== points[j][index] ? 1 : 0), 0);
+        if (diff === 1) {
+          edges.push([i, j]);
+        }
+      }
+    }
+
+    function rotateXY(point, angle) {
+      const [x, y, z, w] = point;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [x * cos - y * sin, x * sin + y * cos, z, w];
+    }
+
+    function rotateXZ(point, angle) {
+      const [x, y, z, w] = point;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [x * cos - z * sin, y, x * sin + z * cos, w];
+    }
+
+    function rotateXW(point, angle) {
+      const [x, y, z, w] = point;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [x * cos - w * sin, y, z, x * sin + w * cos];
+    }
+
+    function rotateYZ(point, angle) {
+      const [x, y, z, w] = point;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [x, y * cos - z * sin, y * sin + z * cos, w];
+    }
+
+    function rotateYW(point, angle) {
+      const [x, y, z, w] = point;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [x, y * cos - w * sin, z, y * sin + w * cos];
+    }
+
+    function rotateZW(point, angle) {
+      const [x, y, z, w] = point;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [x, y, z * cos - w * sin, z * sin + w * cos];
+    }
+
+    function rotate4D(point) {
+      let p = rotateXY(point, rotation.xy);
+      p = rotateXZ(p, rotation.xz);
+      p = rotateXW(p, rotation.xw);
+      p = rotateYZ(p, rotation.yz);
+      p = rotateYW(p, rotation.yw);
+      p = rotateZW(p, rotation.zw);
+      return p;
+    }
+
+    function project4Dto3D(point4D) {
+      const [x, y, z, w] = point4D;
+      const wFactor = camera.distance4D / (camera.distance4D - w);
+      return [x * wFactor, y * wFactor, z * wFactor];
+    }
+
+    function project3Dto2D(point3D) {
+      const [x, y, z] = point3D;
+      const scale = camera.zoom * camera.distance3D / (camera.distance3D - z);
+      return [x * scale + WIDTH / 2 + camera.offsetX, y * scale + HEIGHT / 2 + camera.offsetY];
+    }
+
+    function updateControls() {
+      if (keys['arrowleft']) rotation.xy -= 0.03;
+      if (keys['arrowright']) rotation.xy += 0.03;
+      if (keys['arrowup']) rotation.zw += 0.03;
+      if (keys['arrowdown']) rotation.zw -= 0.03;
+      if (keys['q']) rotation.xw -= 0.03;
+      if (keys['e']) rotation.xw += 0.03;
+      if (keys['a'] && !keys['shift']) camera.offsetX -= 6;
+      if (keys['d'] && !keys['shift']) camera.offsetX += 6;
+      if (keys['w']) camera.offsetY -= 6;
+      if (keys['s']) camera.offsetY += 6;
+      if (keys['z']) rotation.yz -= 0.03;
+      if (keys['c']) rotation.yz += 0.03;
+      if (keys['x']) rotation.yw -= 0.03;
+      if (keys['v']) rotation.yw += 0.03;
+      if (keys['+'] || keys['=']) camera.zoom = Math.min(3, camera.zoom + 0.01);
+      if (keys['-']) camera.zoom = Math.max(0.3, camera.zoom - 0.01);
+      if (keys['pageup']) camera.distance4D = Math.max(200, camera.distance4D - 4);
+      if (keys['pagedown']) camera.distance4D = Math.min(1200, camera.distance4D + 4);
+    }
+
+    window.addEventListener('keydown', (event) => {
+      keys[event.key.toLowerCase()] = true;
+      if (event.key === ' ') {
+        event.preventDefault();
+      }
+    });
+
+    window.addEventListener('keyup', (event) => {
+      keys[event.key.toLowerCase()] = false;
+    });
+
+    const colorButton = document.getElementById('colorButton');
+    const colorMenu = document.getElementById('colorMenu');
+    const langButton = document.getElementById('langButton');
+    const langMenu = document.getElementById('langMenu');
+
+    colorButton.addEventListener('click', () => {
+      colorMenu.style.display = colorMenu.style.display === 'block' ? 'none' : 'block';
+      langMenu.style.display = 'none';
+    });
+
+    langButton.addEventListener('click', () => {
+      langMenu.style.display = langMenu.style.display === 'block' ? 'none' : 'block';
+      colorMenu.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (!colorMenu.contains(event.target) && event.target !== colorButton) {
+        colorMenu.style.display = 'none';
+      }
+      if (!langMenu.contains(event.target) && event.target !== langButton) {
+        langMenu.style.display = 'none';
+      }
+    });
+
+    colorMenu.querySelectorAll('.colorOption').forEach((button) => {
+      button.addEventListener('click', () => {
+        lineColor = button.dataset.color;
+        colorMenu.style.display = 'none';
+      });
+    });
+
+    const widthSlider = document.getElementById('widthSlider');
+    const toggleDots = document.getElementById('toggleDots');
+
+    widthSlider.addEventListener('input', () => {
+      lineWidth = Number(widthSlider.value);
+    });
+
+    toggleDots.addEventListener('click', () => {
+      showDots = !showDots;
+      toggleDots.textContent = showDots ? 'Hide dots' : 'Show dots';
+    });
+
+    const translations = {
+      pt: `Tesseract 4D → 3D → 2D<br>
+      Setas: rotacionar XY/ZW<br>
+      Q/E: rotacionar XW<br>
+      Z/C: rotacionar YZ<br>
+      X/V: rotacionar YW<br>
+      W/S + A/D: mover câmera<br>
+      +/-: zoom<br>
+      PageUp/PageDown: profundidade 4D`,
+      en: `Tesseract 4D → 3D → 2D<br>
+      Arrows: rotate XY/ZW<br>
+      Q/E: rotate XW<br>
+      Z/C: rotate YZ<br>
+      X/V: rotate YW<br>
+      W/S + A/D: move camera<br>
+      +/-: zoom<br>
+      PageUp/PageDown: 4D depth`,
+      ru: `Тессеракт 4D → 3D → 2D<br>
+      Стрелки: вращать XY/ZW<br>
+      Q/E: вращать XW<br>
+      Z/C: вращать YZ<br>
+      X/V: вращать YW<br>
+      W/S + A/D: двигать камеру<br>
+      +/-: масштаб<br>
+      PageUp/PageDown: глубина 4D`,
+      zh: `四维超立方体 4D → 3D → 2D<br>
+      方向键: 旋转 XY/ZW<br>
+      Q/E: 旋转 XW<br>
+      Z/C: 旋转 YZ<br>
+      X/V: 旋转 YW<br>
+      W/S + A/D: 移动相机<br>
+      +/-: 缩放<br>
+      PageUp/PageDown: 4D 深度`
+    };
+
+    const colorLabels = {
+      pt: ['Ciano', 'Rosa', 'Verde', 'Amarelo', 'Azul', 'Branco'],
+      en: ['Cyan', 'Pink', 'Green', 'Yellow', 'Blue', 'White'],
+      ru: ['Голубой', 'Розовый', 'Зелёный', 'Жёлтый', 'Синий', 'Белый'],
+      zh: ['青色', '粉色', '绿色', '黄色', '蓝色', '白色']
+    };
+
+    const info = document.getElementById('info');
+    const colorButtons = colorMenu.querySelectorAll('.colorOption');
+    const langButtons = langMenu.querySelectorAll('.langOption');
+
+    function updateColorLabels(lang) {
+      colorButtons.forEach((button, index) => {
+        button.textContent = colorLabels[lang][index];
+      });
+    }
+
+    function updateLanguage(lang) {
+      langButtons.forEach((button) => {
+        button.classList.toggle('active', button.dataset.lang === lang);
+      });
+      info.innerHTML = translations[lang];
+      updateColorLabels(lang);
+      langMenu.style.display = 'none';
+    }
+
+    langButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        updateLanguage(button.dataset.lang);
+      });
+    });
+
+    updateLanguage('pt');
+
+    function draw() {
+      updateControls();
+
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      const projected = [];
+      for (const p of points) {
+        const rotated = rotate4D(p);
+        const p3 = project4Dto3D(rotated);
+        projected.push(project3Dto2D(p3));
+      }
+
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = lineWidth;
+      for (const edge of edges) {
+        const a = projected[edge[0]];
+        const b = projected[edge[1]];
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(b[0], b[1]);
+        ctx.stroke();
+      }
+
+      if (showDots) {
+        ctx.fillStyle = 'white';
+        for (const p of projected) {
+          ctx.beginPath();
+          ctx.arc(p[0], p[1], 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
